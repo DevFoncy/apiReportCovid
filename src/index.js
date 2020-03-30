@@ -9,6 +9,7 @@ app.use(express.json());
 
 // Routes
 app.use(require('./routes/employees'));
+app.use(require('./routes/login'));
 
 // Starting the server
 app.listen(app.get('port'), () => {
