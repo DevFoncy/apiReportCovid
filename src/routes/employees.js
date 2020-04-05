@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const mysqlConnection  = require('../database.js');
+const mysqlConnection = require('../database.js');
 
 // GET all Employees
 router.get('/', (req, res) => {
-  mysqlConnection.query('SELECT * FROM employee', (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('SELECT * FROM employee', (err, rows, fields) => {
     if(!err) {
       res.json(rows);
     } else {
@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
 // GET An Employee
 router.get('/:id', (req, res) => {
   const { id } = req.params; 
-  mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
     if (!err) {
       res.json(rows[0]);
     } else {
@@ -29,7 +29,7 @@ router.get('/:id', (req, res) => {
 // DELETE An Employee
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
-  mysqlConnection.query('DELETE FROM employee WHERE id = ?', [id], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('DELETE FROM employee WHERE id = ?', [id], (err, rows, fields) => {
     if(!err) {
       res.json({status: 'Employee Deleted'});
     } else {
@@ -48,7 +48,7 @@ router.post('/newPost', (req, res) => {
     SET @salary = ?;
     CALL employeeAddOrEdit(@id, @name, @salary);
   `;
-  mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
     if(!err) {
       res.json({status: 'Employeed Saved'});
     } else {
@@ -68,7 +68,7 @@ router.post('/', (req, res) => {
     SET @salary = ?;
     CALL employeeAddOrEdit(@id, @name, @salary);
   `;
-  mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
     if(!err) {
       res.json({status: 'Employeed Saved'});
     } else {
@@ -87,7 +87,7 @@ router.put('/:id', (req, res) => {
     SET @salary = ?;
     CALL employeeAddOrEdit(@id, @name, @salary);
   `;
-  mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
     if(!err) {
       res.json({status: 'Employee Updated'});
     } else {

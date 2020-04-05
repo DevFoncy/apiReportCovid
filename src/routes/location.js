@@ -1,112 +1,49 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 
-const mysqlConnection  = require('../database.js');
+const mysqlConnection = require('../database.js');
+let endPointsFormat = require('../utils/format.js');
 
-// GET all Employees
-// router.get('/', (req, res) => {
-//   mysqlConnection.query('SELECT * FROM employee', (err, rows, fields) => {
-//     if(!err) {
-//       res.json(rows);
-//     } else {
-//       console.log(err);
-//     }
-//   });
-// });
-//
-// // GET An Employee
-// router.get('/:id', (req, res) => {
-//   const { id } = req.params;
-//   mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
-//     if (!err) {
-//       res.json(rows[0]);
-//     } else {
-//       console.log(err);
-//     }
-//   });
-// });
-//
-// // DELETE An Employee
-// router.delete('/:id', (req, res) => {
-//   const { id } = req.params;
-//   mysqlConnection.query('DELETE FROM employee WHERE id = ?', [id], (err, rows, fields) => {
-//     if(!err) {
-//       res.json({status: 'Employee Deleted'});
-//     } else {
-//       console.log(err);
-//     }
-//   });
-// });
-//
-// INSERT An Employee
+
 router.post('/location/save', (req, res) => {
-  const {id, name, salary} = req.body;
-  let location = {
-    name : "Mercado Lobaton",
-    department : "Lima",
-    province : "Lima",
-    district : "Lince",
-    points : [
-      {lat : -12.086220, lng : -77.033055},
-      {lat : -12.086111, lng : -77.032261},
-      {lat : -12.086640, lng : -77.032173},
-      {lat : -12.086765, lng : -77.032984}
-    ]
-  };
+  const {name, department, province, district, points} = req.body;
+  let location = {name, department, province, district, points};
+  let dateNow = moment().format("D/MM/YYYY h:mm:ss");
 
-  const query = `
-    SET @departamento = ?;
-    SET @provincia = ?;
-    SET @distrito = ?;
-    SET @distrito = ?;
-    CALL employeeAddOrEdit(@id, @name, @salary);
-  `;
-  mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
-    if(!err) {
-      res.json({status: 'Employeed Saved'});
+  mysqlConnection.mysqlConnection.query("INSERT INTO establecimiento (departamento,provincia,distrito,nombre,fecha_creacion) VALUES (?,?,?,?,?)",
+    [location.department, location.province, location.district, location.name, dateNow], (err, response) => {
+      if (!err) {
+        location.points.map((point) => {
+          mysqlConnection.mysqlConnection.query("INSERT INTO coordenada (lat, lng, establecimiento_id) VALUES (?,?,?)",
+            [point.lat, point.lng, response.insertId]);
+        });
+        res.json(endPointsFormat.formatEndPointSuccess('Guardado con exito'));
+
+      } else {
+        res.json(endPointsFormat.formatEndPointFailed('Error al guardar en la base datos' + err));
+      }
+    });
+});
+
+router.get('/location/all', (req, res) => {
+  mysqlConnection.mysqlConnection.query('SELECT  distinct e.* FROM establecimiento e inner join  coordenada c  ON c.establecimiento_id = e.id ', (err, rows) => {
+    if (!err) {
+      let response = [];
+      let points = [];
+      rows.map((location) => {
+        let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
+        location.points = resultados;
+        response.push(location);
+      });
+      res.json(response);
     } else {
-      console.log(err);
+      res.json(endPointsFormat.formatEndPointFailed('Error al traer la informacion'));
     }
   });
-
 });
-//
-// // INSERT An Employee
-// router.post('/', (req, res) => {
-//   const {id, name, salary} = req.body;
-//   console.log(id, name, salary);
-//   const query = `
-//     SET @id = ?;
-//     SET @name = ?;
-//     SET @salary = ?;
-//     CALL employeeAddOrEdit(@id, @name, @salary);
-//   `;
-//   mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
-//     if(!err) {
-//       res.json({status: 'Employeed Saved'});
-//     } else {
-//       console.log(err);
-//     }
-//   });
-//
-// });
-//
-// router.put('/:id', (req, res) => {
-//   const { name, salary } = req.body;
-//   const { id } = req.params;
-//   const query = `
-//     SET @id = ?;
-//     SET @name = ?;
-//     SET @salary = ?;
-//     CALL employeeAddOrEdit(@id, @name, @salary);
-//   `;
-//   mysqlConnection.query(query, [id, name, salary], (err, rows, fields) => {
-//     if(!err) {
-//       res.json({status: 'Employee Updated'});
-//     } else {
-//       console.log(err);
-//     }
-//   });
-// });
+
+
+
 
 module.exports = router;
