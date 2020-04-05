@@ -13,7 +13,7 @@ let endPointsFormat = require('../utils/format.js');
 // GET An Employee
 router.get('/test/:id', (req, res) => {
   const {id} = req.params;
-  mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
     if (!err) {
       res.json( endPointsFormat.formatEndPointSuccess('Informacion traida con exito', rows[0]));
     } else {
@@ -35,7 +35,7 @@ router.post('/login', (req, res) => {
   }).then(function (message) { //success
     token = message.sid;
     let dateNow = moment().format("D/MM/YYYY h:mm:ss"); // "Sunday, February 14th 2010, 3:25:50 pm"
-    mysqlConnection.query("INSERT INTO solicitud_registro (token, code, status, celular, date_created) VALUES (?,?,?,?,?)", [token, generateCode, 0, phone, dateNow], (err, rows, fields) => {
+    mysqlConnection.mysqlConnection.query("INSERT INTO solicitud_registro (token, code, status, celular, date_created) VALUES (?,?,?,?,?)", [token, generateCode, 0, phone, dateNow], (err, rows, fields) => {
       if (!err) {
         res.json(  endPointsFormat.formatEndPointSuccess('El token fue enviado', token));
       } else {
@@ -54,11 +54,11 @@ router.post('/checkNumber', (req, res) => {
   const {phone, code} = req.body;
   let token = [];
   //Get the row
-  mysqlConnection.query('SELECT token FROM solicitud_registro where celular = ? and code = ? and status = 0 LIMIT 1 ', [phone, code], (err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('SELECT token FROM solicitud_registro where celular = ? and code = ? and status = 0 LIMIT 1 ', [phone, code], (err, rows, fields) => {
     if (!err) {
       token = rows[0] ? rows[0].token : [] ;
       if(token.length > 1){
-        mysqlConnection.query("UPDATE solicitud_registro SET status = 1 WHERE token = ?", [token], (err, rows, fields) => {
+        mysqlConnection.mysqlConnection.query("UPDATE solicitud_registro SET status = 1 WHERE token = ?", [token], (err, rows, fields) => {
           if (!err) {
             res.json( endPointsFormat.formatEndPointSuccess('Se valido la cuenta con exito'));
           } else {
