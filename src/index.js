@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const mysqlConnection = require('./database.js');
 
 // Settings
 app.set('port', process.env.PORT || 3000);
@@ -16,3 +17,15 @@ app.use(require('./routes/location'));
 app.listen(app.get('port'), () => {
   console.log(`Server on port ${app.get('port')}`);
 });
+
+function  result  () {
+  let  locations = mysqlConnection.connectionSyncronus.query('SELECT id, nombre FROM establecimiento');
+  locations.map( (location, ) => {
+    location.peopleNumber = 0;
+  });
+  return locations;
+};
+app.set('locationsMemory', result());
+
+
+
