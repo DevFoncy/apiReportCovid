@@ -36,7 +36,8 @@ router.get('/location/all', (req, res) => {
         location.points = resultados;
         response.push(location);
       });
-      res.json(response);
+      res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
+
     } else {
       res.json(endPointsFormat.formatEndPointFailed('Error al traer la informacion'));
     }
