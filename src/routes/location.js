@@ -70,7 +70,7 @@ router.post('/location/into', (req, res) => {
 });
 
 
-router.get('/location/into', (req, res) => {
+router.post('/location/into/search', (req, res) => {
   const {placecode} = req.body;
   let locations = req.app.get('locationsMemory');
   let response = locations.filter( (location) => location.id === placecode);
