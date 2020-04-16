@@ -36,12 +36,52 @@ router.get('/location/all', (req, res) => {
         location.points = resultados;
         response.push(location);
       });
-      res.json(response);
+      res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
+
     } else {
       res.json(endPointsFormat.formatEndPointFailed('Error al traer la informacion'));
     }
   });
 });
+
+
+router.post('/location/into', (req, res) => {
+  const {usercode, placecode, action} = req.body;
+  let locationFound;
+  let locations = req.app.get('locationsMemory');
+  locationFound = locations.find( (location => placecode === location.id) );
+  if(locationFound) {
+    locations.map(location => {
+      if (location.id === locationFound.id) {
+        if(action === "IN") {
+          location.peopleNumber++;
+          res.json(endPointsFormat.formatEndPointSuccess('Ingreso una persona en el location ' + location.nombre));
+
+        }else{
+          location.peopleNumber--;
+          res.json(endPointsFormat.formatEndPointSuccess('Salio una persona'));
+        }
+      }
+    });
+  }
+  else{
+    res.json(endPointsFormat.formatEndPointFailed('No se encontro el id'));
+  }
+});
+
+
+router.post('/location/into/search', (req, res) => {
+  const {placecode} = req.body;
+  let locations = req.app.get('locationsMemory');
+  let response = locations.filter( (location) => location.id === placecode);
+  if(response){
+    res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
+  }else{
+    res.json(endPointsFormat.formatEndPointFailed('Placecode mal ingresado'));
+  }
+});
+
+
 
 
 

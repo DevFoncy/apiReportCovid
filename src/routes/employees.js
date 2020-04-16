@@ -11,12 +11,12 @@ router.get('/', (req, res) => {
     } else {
       console.log(err);
     }
-  });  
+  });
 });
 
 // GET An Employee
 router.get('/:id', (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   mysqlConnection.mysqlConnection.query('SELECT * FROM employee WHERE id = ?', [id], (err, rows, fields) => {
     if (!err) {
       res.json(rows[0]);
@@ -61,7 +61,7 @@ router.post('/newPost', (req, res) => {
 // INSERT An Employee
 router.post('/', (req, res) => {
   const {id, name, salary} = req.body;
-    console.log(id, name, salary);
+  console.log(id, name, salary);
   const query = `
     SET @id = ?;
     SET @name = ?;
