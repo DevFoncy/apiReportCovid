@@ -51,7 +51,7 @@ router.post('/user/create', (req, res) => {
     if (!err) {
       res.json( endPointsFormat.formatEndPointSuccess('Usuario creado con exito!'));
     } else {
-      res.json( endPointsFormat.formatEndPointFailed('No se pudo traer los usuarios', err));
+      res.json( endPointsFormat.formatEndPointFailed('No se pudo registrar el usuario , ERROR en el QUERY', err));
     }
   });
 });
