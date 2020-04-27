@@ -111,6 +111,7 @@ router.get('/location/all', (req, res) => {
 router.post('/location/into', (req, res) => {
   const {usercode, placecode, action} = req.body;
   let locationFound, userAvailable;
+  
   let locations = req.app.get('locationsMemory');
   locationFound = locations.find( (location => placecode === location.id) );
   if(locationFound) {
