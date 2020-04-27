@@ -15,8 +15,17 @@ const formatEndPointFailed = (message, info = []) => {
   return data;
 };
 
+const removeElement = (array, elem) => {
+  let index = array.indexOf(elem);
+  if (index > -1) {
+    array.splice(index, 1);
+  }
+  return array;
+};
+
 module.exports = Object.freeze({
   formatEndPointSuccess,
-  formatEndPointFailed
+  formatEndPointFailed,
+  removeElement
 });
 

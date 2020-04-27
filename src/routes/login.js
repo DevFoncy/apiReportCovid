@@ -72,8 +72,20 @@ router.post('/checkNumber', (req, res) => {
       res.json( endPointsFormat.formatEndPointFailed('Error de base de datos'));
     }
   });
-
-
-
 });
+
+router.post('/user/support', (req, res) => {
+  const {usercode, enable} = req.body;
+  //Get the row
+  mysqlConnection.mysqlConnection.query('UPDATE usuario set support = ? WHERE id =  ? ', [enable, usercode], (err, rows, fields) => {
+    if (!err) {
+        res.json( endPointsFormat.formatEndPointSuccess('Se ha habilitado el apoyo del usuario'));
+    } else {
+      res.json( endPointsFormat.formatEndPointFailed('No pudo habilitarse el apoyo', err));
+    }
+  });
+});
+
+
+
 module.exports = router;

@@ -13,6 +13,8 @@ app.use(express.json());
 app.use(require('./routes/employees'));
 app.use(require('./routes/login'));
 app.use(require('./routes/location'));
+app.use(require('./routes/user'));
+
 
 // Starting the server
 app.listen(app.get('port'), () => {
@@ -22,7 +24,7 @@ app.listen(app.get('port'), () => {
 function  result  () {
   let  locations = mysqlConnection.connectionSyncronus.query('SELECT id, nombre FROM establecimiento');
   locations.map( (location, ) => {
-    location.peopleNumber = 0;
+    location.peopleNumber = [];
   });
   return locations;
 };
