@@ -4,7 +4,8 @@ const moment = require('moment');
 
 const mysqlConnection = require('../database.js');
 let endPointsFormat = require('../utils/format.js');
-
+let utils = require('./../constant.js');
+const AFORO = 2;
 
 router.post('/location/save', (req, res) => {
   const {name, department, province, district, points} = req.body;
@@ -26,28 +27,12 @@ router.post('/location/save', (req, res) => {
     });
 });
 
-router.get('/location/all', (req, res) => {
-  mysqlConnection.mysqlConnection.query('SELECT  distinct e.* FROM establecimiento e inner join  coordenada c  ON c.establecimiento_id = e.id ', (err, rows) => {
-    if (!err) {
-      let response = [];
-      let points = [];
-      rows.map((location) => {
-        let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
-        location.points = resultados;
-        response.push(location);
-      });
-      res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
-
-    } else {
-      res.json(endPointsFormat.formatEndPointFailed('Error al traer la informacion'));
-    }
-  });
-});
-
 router.get('/location/near', (req, res) => {
-  const {usercode} = req.body;
+  const {usercode, lat , lng} = req.body;
+  let locations = req.app.get('locationsMemory'); //array static
   let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
   if ( coordenadas.length > 0){
+    let locationFound;
     mysqlConnection.mysqlConnection.query(' \n' +
       ' SELECT *,\n' +
       '      111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))\n' +
@@ -66,13 +51,16 @@ router.get('/location/near', (req, res) => {
       '       from establecimiento tl)\n' +
       ' having distance_in_km < 2\n' +
       ' order by distance_in_km asc\n' +
-      ' limit 5;',[coordenadas[0].latitud, coordenadas[0].longitud], (err, rows) => {
+      ' limit 5;',[lat ? lat :  coordenadas[0].latitud, lng? lng : coordenadas[0].longitud], (err, rows) => {
       if (!err) {
         let response = [];
         rows.map((location) => {
           let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
           location.points = resultados;
           location.aforo = 100;
+          locationFound = locations.find( l => (l.id === location.id));
+          location.supportUsers = locationFound.supportUsers;
+          location.peopleNumber = locationFound.peopleNumber;
           response.push(location);
         });
         res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
@@ -88,14 +76,21 @@ router.get('/location/near', (req, res) => {
 });
 
 
+//Endpoint 4.1 PRIMERA CARGA
 router.get('/location/all', (req, res) => {
+  let locations = req.app.get('locationsMemory'); //array static
   mysqlConnection.mysqlConnection.query('SELECT  distinct e.* FROM establecimiento e inner join  coordenada c  ON c.establecimiento_id = e.id ', (err, rows) => {
     if (!err) {
       let response = [];
+      let locationFound;
       rows.map((location) => {
         let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
         location.points = resultados;
-        location.aforo= 100;
+        location.aforo= AFORO;
+        locationFound = locations.find( l => (l.id === location.id));
+        location.supportUsers = locationFound.supportUsers;
+        location.peopleNumber = locationFound.peopleNumber;
+        location.criticality = utils.findCriticity(locationFound.peopleNumber, AFORO);
         response.push(location);
       });
       res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
@@ -107,7 +102,7 @@ router.get('/location/all', (req, res) => {
 });
 
 
-
+//Endpoint 5
 router.post('/location/into', (req, res) => {
   const {usercode, placecode, action} = req.body;
   let locationFound, userAvailable;
@@ -120,17 +115,20 @@ router.post('/location/into', (req, res) => {
       locations.map(location => {
         if (location.id === locationFound.id) {
           if(action === "IN") { //enter location
-            userAvailable = location.peopleNumber;
+            userAvailable = location.supportUsers;
             if(user[0].support === '1'){ //Support people
               userAvailable.push(usercode);
-              location.peopleNumber = userAvailable;
-              res.json(endPointsFormat.formatEndPointSuccess('Ingreso una persona en el location ' + location.nombre + 'con usercode '+ usercode));
-            }else{ //Dont support
-              res.json(endPointsFormat.formatEndPointSuccess('Ingreso una persona en el location pero no hace favores'));
+              location.supportUsers = userAvailable;
+              console.log('Ingreso una persona en el location ' + location.nombre + 'con usercode '+ usercode);
+            } else{ //Dont support
+              console.log('Ingreso una persona en el location pero no hace favores');
             }
+            location.peopleNumber++;
+            res.json(endPointsFormat.formatEndPointSuccess('Ingreso una persona en el location '  + location.nombre + + 'con usercode '+ usercode));
           }else{ //go out location
-            userAvailable = location.peopleNumber;
-            location.peopleNumber = endPointsFormat.removeElement(userAvailable, usercode);
+            userAvailable = location.supportUsers;
+            location.supportUsers = endPointsFormat.removeElement(userAvailable, usercode);
+            location.peopleNumber--;
             res.json(endPointsFormat.formatEndPointSuccess('Salio una persona'));
           }
         }
@@ -144,7 +142,7 @@ router.post('/location/into', (req, res) => {
   }
 });
 
-
+//Endpoint 6
 router.post('/location/into/search', (req, res) => {
   const {placecode} = req.body;
   let locations = req.app.get('locationsMemory');
@@ -155,6 +153,7 @@ router.post('/location/into/search', (req, res) => {
     res.json(endPointsFormat.formatEndPointFailed('Placecode mal ingresado'));
   }
 });
+
 
 router.get('/location/into/all', (req, res) => {
    let locations = req.app.get('locationsMemory');
