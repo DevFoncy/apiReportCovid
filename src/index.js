@@ -24,7 +24,8 @@ app.listen(app.get('port'), () => {
 function  result  () {
   let  locations = mysqlConnection.connectionSyncronus.query('SELECT id, nombre FROM establecimiento');
   locations.map( (location, ) => {
-    location.peopleNumber = [];
+    location.peopleNumber = 0;
+    location.supportUsers = [];
   });
   return locations;
 };
