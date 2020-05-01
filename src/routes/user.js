@@ -44,10 +44,10 @@ router.post('/user/support', (req, res) => {
 
 
 router.post('/user/create', (req, res) => {
-  const {usercode, dni, nombres,apellidos,email, enable , lat, lng, celular} = req.body;
+  const {usercode, dni, nombres,apellidos,email, enable , lat, lng, celular ,address, findOut} = req.body;
   let dateNow = moment().format("D/MM/YYYY h:mm:ss"); // "Sunday, February 14th 2010, 3:25:50 pm"
   //Get the row
-  mysqlConnection.mysqlConnection.query('INSERT INTO usuario(id, dni, nombres, apellidos, email, celular, support, latitud, longitud, fecha_registro) values (?,?,?,?,?,?,?,?,?,?)',[usercode, dni, nombres,apellidos,email, celular,  enable , lat, lng,dateNow],(err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('INSERT INTO usuario(id, dni, nombres, apellidos, email, celular, support, latitud, longitud, fecha_registro, address, findOut) values (?,?,?,?,?,?,?,?,?,?,?,?)',[usercode, dni, nombres,apellidos,email, celular,  enable , lat, lng,dateNow,address,findOut],(err, rows, fields) => {
     if (!err) {
       res.json( endPointsFormat.formatEndPointSuccess('Usuario creado con exito!'));
     } else {
