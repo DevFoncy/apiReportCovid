@@ -28,7 +28,7 @@ router.post('/location/save', (req, res) => {
 });
 
 //Endpoint 4
-router.get('/location/near', (req, res) => {
+router.post('/location/near', (req, res) => {
   const {usercode, lat , lng} = req.body;
   let locations = req.app.get('locationsMemory'); //array static
   let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
