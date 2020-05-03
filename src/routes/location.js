@@ -58,7 +58,6 @@ router.post('/location/near', (req, res) => {
         rows.map((location) => {
           let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
           location.points = resultados;
-          location.aforo = 100;
           locationFound = locations.find( l => (l.id === location.id));
           location.supportUsers = locationFound.supportUsers;
           location.peopleNumber = locationFound.peopleNumber;
@@ -87,7 +86,6 @@ router.get('/location/all', (req, res) => {
       rows.map((location) => {
         let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
         location.points = resultados;
-        location.aforo= AFORO;
         locationFound = locations.find( l => (l.id === location.id));
         location.supportUsers = locationFound.supportUsers;
         location.peopleNumber = locationFound.peopleNumber;
