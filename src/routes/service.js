@@ -13,11 +13,15 @@ const STATUS_SERVICE_FINISHED= 3;
 
 
 router.post('/service/create', (req, res) => {
-  const {usercode_solicita, usercode_hacefavor, pedido} = req.body;
+  const {usercode_solicita, pedido} = req.body;
   let dateNow = moment().format("D/MM/YYYY h:mm:ss"); // "Sunday, February 14th 2010, 3:25:50 pm"
   //Get the row
-  mysqlConnection.mysqlConnection.query('INSERT INTO service(usercode_solicita, usercode_favor, pedido , status, date_created) values (?,?,?,?,?)',[usercode_solicita, usercode_hacefavor, pedido, STATUS_SERVICE_PENDING,dateNow],(err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('INSERT INTO service(usercode_solicita , status, date_created) values (?,?,?)',[usercode_solicita, STATUS_SERVICE_PENDING,dateNow],(err, rows, fields) => {
     if (!err) {
+      pedido.map( p => {
+        mysqlConnection.mysqlConnection.query("INSERT INTO service_detalle (id_service, description, count) VALUES (?,?,?)",
+          [rows.insertId, p.descripcion, p.cantidad]);
+      });
       let response = {
         "idServicio": rows.insertId,
         "status" : STATUS_SERVICE_START,
@@ -53,10 +57,5 @@ router.get('/service/all', (req, res) => {
     }
   });
 });
-
-
-
-
-
 
 module.exports = router;
