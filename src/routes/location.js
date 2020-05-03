@@ -5,7 +5,7 @@ const moment = require('moment');
 const mysqlConnection = require('../database.js');
 let endPointsFormat = require('../utils/format.js');
 let utils = require('./../constant.js');
-const AFORO = 100;
+const AFORO = 10;
 
 router.post('/location/save', (req, res) => {
   const {name, department, province, district, points} = req.body;
