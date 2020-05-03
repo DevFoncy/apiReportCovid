@@ -36,8 +36,8 @@ router.post('/service/create', (req, res) => {
 
 
 router.put('/service/update', (req, res) => {
-  const {idServicio , status, rating} = req.body;
-  mysqlConnection.mysqlConnection.query('UPDATE service set status = ? , rating = ? WHERE id= ?',[status, rating, idServicio],(err, rows, fields) => {
+  const {idServicio , status, rating ,user_support} = req.body;
+  mysqlConnection.mysqlConnection.query('UPDATE service set status = ? , rating = ?, usercode_favor = ?  WHERE id= ?',[status, rating, user_support,idServicio],(err, rows, fields) => {
     if (!err) {
       res.json( endPointsFormat.formatEndPointSuccess('EStado del servicio finalizado'));
     } else {
