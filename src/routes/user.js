@@ -43,6 +43,20 @@ router.post('/user/support', (req, res) => {
 });
 
 
+router.put('/user/token', (req, res) => {
+  const {usercode, token} = req.body;
+  //Get the row
+  mysqlConnection.mysqlConnection.query('UPDATE usuario set token_notificacion = ? WHERE id =  ? ', [token, usercode], (err, rows, fields) => {
+    if (!err && rows.affectedRows > 0) {
+      res.json( endPointsFormat.formatEndPointSuccess('Se ha actualizado el token de usuario'));
+    } else {
+      res.json( endPointsFormat.formatEndPointFailed('No se encontre el usercode'));
+    }
+  });
+});
+
+
+
 router.post('/user/create', (req, res) => {
   const {usercode, dni, nombres,apellidos,email, enable , lat, lng, celular ,address, findOut} = req.body;
   let dateNow = moment().format("D/MM/YYYY h:mm:ss"); // "Sunday, February 14th 2010, 3:25:50 pm"
