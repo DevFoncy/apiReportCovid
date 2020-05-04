@@ -28,7 +28,7 @@ router.post('/location/save', (req, res) => {
 });
 
 //Endpoint 4
-router.get('/location/near', (req, res) => {
+router.post('/location/near', (req, res) => {
   const {usercode, lat , lng} = req.body;
   let locations = req.app.get('locationsMemory'); //array static
   let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
@@ -58,10 +58,10 @@ router.get('/location/near', (req, res) => {
         rows.map((location) => {
           let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
           location.points = resultados;
-          location.aforo = 100;
           locationFound = locations.find( l => (l.id === location.id));
           location.supportUsers = locationFound.supportUsers;
           location.peopleNumber = locationFound.peopleNumber;
+          location.criticality = utils.findCriticity(locationFound.peopleNumber, location.aforo ? location.aforo : AFORO);
           response.push(location);
         });
         res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
@@ -87,11 +87,10 @@ router.get('/location/all', (req, res) => {
       rows.map((location) => {
         let resultados = mysqlConnection.connectionSyncronus.query('SELECT c.lat, c.lng FROM coordenada c WHERE c.establecimiento_id =' + location.id);
         location.points = resultados;
-        location.aforo= AFORO;
         locationFound = locations.find( l => (l.id === location.id));
         location.supportUsers = locationFound.supportUsers;
         location.peopleNumber = locationFound.peopleNumber;
-        location.criticality = utils.findCriticity(locationFound.peopleNumber, AFORO);
+        location.criticality = utils.findCriticity(locationFound.peopleNumber, location.aforo ? location.aforo : AFORO);
         response.push(location);
       });
       res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
@@ -149,7 +148,9 @@ router.post('/location/into/search', (req, res) => {
   let locations = req.app.get('locationsMemory');
   let response = locations.filter( (location) => location.id === placecode)[0];
   if(response){
+    let newResponse = response;
     let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
+    let location =  mysqlConnection.connectionSyncronus.query('select * from establecimiento where id ='+ placecode);
     mysqlConnection.mysqlConnection.query(' SELECT *,\n' +
       '      111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))\n' +
       '                 * COS(RADIANS(latitud))\n' +
@@ -165,8 +166,8 @@ router.post('/location/into/search', (req, res) => {
       ' order by distance_in_km asc\n' +
       ' limit 5;',[lat ? lat :  coordenadas[0].latitud, lng? lng : coordenadas[0].longitud], (err, rows) => {
       if (!err) {
-          let userInto = response.supportUsers; // array  support users into location
-          let userNearIntoLocation = 0;
+        let userInto = newResponse.supportUsers; // array  support users into location
+        let userNearIntoLocation = 0;
           if(userInto.length > 0) {
             rows.map( (user) => {
               if(userInto.includes(user.id)){
@@ -174,8 +175,8 @@ router.post('/location/into/search', (req, res) => {
               }
             });
           }
-        response.numPersApoyo = userNearIntoLocation;
-        response.criticality = utils.findCriticity(response.peopleNumber, AFORO);
+        newResponse.numPersApoyo = userNearIntoLocation;
+        newResponse.criticality = utils.findCriticity(newResponse.peopleNumber, location[0].aforo ? location[0].aforo : AFORO);
         res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
       } else{
         res.json(endPointsFormat.formatEndPointSuccess('Error al traer los vecinos cercanos al usuario'));
