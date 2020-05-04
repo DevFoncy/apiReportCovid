@@ -89,7 +89,7 @@ router.get('/location/all', (req, res) => {
         locationFound = locations.find( l => (l.id === location.id));
         location.supportUsers = locationFound.supportUsers;
         location.peopleNumber = locationFound.peopleNumber;
-        location.criticality = utils.findCriticity(locationFound.peopleNumber, AFORO);
+        location.criticality = utils.findCriticity(locationFound.peopleNumber, location.aforo ? location.aforo : AFORO);
         response.push(location);
       });
       res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
@@ -173,6 +173,7 @@ router.post('/location/into/search', (req, res) => {
             });
           }
         response.numPersApoyo = userNearIntoLocation;
+        response.criticality = utils.findCriticity(response.peopleNumber, response.aforo ? response.aforo : AFORO);
         response.criticality = utils.findCriticity(response.peopleNumber, AFORO);
         res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
       } else{
