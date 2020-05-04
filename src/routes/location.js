@@ -149,6 +149,7 @@ router.post('/location/into/search', (req, res) => {
   let response = locations.filter( (location) => location.id === placecode)[0];
   if(response){
     let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
+    let location =  mysqlConnection.connectionSyncronus.query('select * from establecimiento where id ='+ placecode);
     mysqlConnection.mysqlConnection.query(' SELECT *,\n' +
       '      111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))\n' +
       '                 * COS(RADIANS(latitud))\n' +
@@ -174,7 +175,7 @@ router.post('/location/into/search', (req, res) => {
             });
           }
         response.numPersApoyo = userNearIntoLocation;
-        response.criticality = utils.findCriticity(response.peopleNumber, response.aforo ? response.aforo : AFORO);
+        response.criticality = utils.findCriticity(response.peopleNumber, location[0].aforo ? location[0].aforo : AFORO);
         res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
       } else{
         res.json(endPointsFormat.formatEndPointSuccess('Error al traer los vecinos cercanos al usuario'));
