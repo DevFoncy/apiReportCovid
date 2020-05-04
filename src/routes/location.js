@@ -174,7 +174,6 @@ router.post('/location/into/search', (req, res) => {
           }
         response.numPersApoyo = userNearIntoLocation;
         response.criticality = utils.findCriticity(response.peopleNumber, response.aforo ? response.aforo : AFORO);
-        response.criticality = utils.findCriticity(response.peopleNumber, AFORO);
         res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
       } else{
         res.json(endPointsFormat.formatEndPointSuccess('Error al traer los vecinos cercanos al usuario'));
