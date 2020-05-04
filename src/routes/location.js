@@ -61,6 +61,7 @@ router.post('/location/near', (req, res) => {
           locationFound = locations.find( l => (l.id === location.id));
           location.supportUsers = locationFound.supportUsers;
           location.peopleNumber = locationFound.peopleNumber;
+          location.criticality = utils.findCriticity(locationFound.peopleNumber, location.aforo ? location.aforo : AFORO);
           response.push(location);
         });
         res.json(endPointsFormat.formatEndPointSuccess('Data traigo con exito', response));
