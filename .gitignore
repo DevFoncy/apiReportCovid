@@ -1,4 +1,7 @@
 node_modules
 .idea
 /env
+.env
 .idea/
+/fbcovid.json
+fbcovid.json
