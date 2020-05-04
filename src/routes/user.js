@@ -50,7 +50,7 @@ router.put('/user/token', (req, res) => {
     if (!err && rows.affectedRows > 0) {
       res.json( endPointsFormat.formatEndPointSuccess('Se ha actualizado el token de usuario'));
     } else {
-      res.json( endPointsFormat.formatEndPointFailed('No se encontre el usercode'));
+      res.json( endPointsFormat.formatEndPointFailed('No se encontre el usercode',err));
     }
   });
 });
