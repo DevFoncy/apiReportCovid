@@ -61,6 +61,8 @@ router.post('/location/near', (req, res) => {
           locationFound = locations.find( l => (l.id === location.id));
           location.supportUsers = locationFound.supportUsers;
           location.peopleNumber = locationFound.peopleNumber;
+          let unique = [...new Set(locationFound.supportUsers)];
+          location.numPersApoyo = unique.length;
           location.criticality = utils.findCriticity(locationFound.peopleNumber, location.aforo ? location.aforo : AFORO);
           response.push(location);
         });
@@ -119,9 +121,9 @@ router.post('/location/into', (req, res) => {
             if(user[0].support === '1'){ //Support people
               userAvailable.push(usercode);
               location.supportUsers = userAvailable;
-              console.log('Ingreso una persona en el location ' + location.nombre + 'con usercode '+ usercode);
+              // console.log('Ingreso una persona en el location ' + location.nombre + 'con usercode '+ usercode);
             } else{ //Dont support
-              console.log('Ingreso una persona en el location pero no hace favores');
+              // console.log('Ingreso una persona en el location pero no hace favores');
             }
             location.peopleNumber++;
             res.json(endPointsFormat.formatEndPointSuccess('Ingreso una persona en el location '  + location.nombre + + 'con usercode '+ usercode));
@@ -167,15 +169,7 @@ router.post('/location/into/search', (req, res) => {
       ' limit 5;',[lat ? lat :  coordenadas[0].latitud, lng? lng : coordenadas[0].longitud], (err, rows) => {
       if (!err) {
         let userInto = newResponse.supportUsers; // array  support users into location
-        let userNearIntoLocation = 0;
-          if(userInto.length > 0) {
-            rows.map( (user) => {
-              if(userInto.includes(user.id)){
-                userNearIntoLocation++;
-              }
-            });
-          }
-        newResponse.numPersApoyo = userNearIntoLocation;
+        newResponse.numPersApoyo = countPeopleSupport(rows, userInto);
         newResponse.criticality = utils.findCriticity(newResponse.peopleNumber, location[0].aforo ? location[0].aforo : AFORO);
         res.json(endPointsFormat.formatEndPointSuccess('Location encontrado con exito', response));
       } else{
@@ -237,6 +231,19 @@ router.get('/location/into/all', (req, res) => {
    res.json(endPointsFormat.formatEndPointSuccess('Ubicaciones del array', locations));
  });
 
+
+//rows: vecinos que viven cerca  , userInto  : usuarios que del array statico
+function countPeopleSupport (rows, userInto) {
+  let userNearIntoLocation = 0;
+  if(userInto.length > 0) {
+    rows.map( (user) => {
+      if(userInto.includes(user.id)){
+         userNearIntoLocation++;
+      }
+    });
+  }
+  return userNearIntoLocation;
+}
 
 
 
