@@ -7,9 +7,10 @@ const mysqlConnection = require('../database.js');
 let endPointsFormat = require('../utils/format.js');
 
 const STATUS_SERVICE_PENDING = 0;
-const STATUS_SERVICE_START=1;
-const STATUS_SERVICE_CANCEL = 2;
-const STATUS_SERVICE_FINISHED= 3;
+const STATUS_SERVICE_NOTIFY = 1;
+const STATUS_SERVICE_START=2;
+const STATUS_SERVICE_CANCEL = 3;
+const STATUS_SERVICE_FINISHED= 4;
 
 
 
