@@ -40,7 +40,7 @@ router.get('/service/all', (req, res) => {
 router.get('/service', (req, res) => {
   let id = req.query.id;
   mysqlConnection.mysqlConnection.query('SELECT * FROM service WHERE id = ?', [id],(err, rows, fields) => {
-    if (!err) {
+    if (!err && rows.affectedRows > 0) {
       let response = rows[0];
       let detalle = mysqlConnection.connectionSyncronus.query('select * from service_detalle where id_service = ' + "'"+ id + "'");
       let location = mysqlConnection.connectionSyncronus.query('select * from establecimiento where id = ' + response.placecode)[0];
