@@ -26,7 +26,7 @@ router.post('/service/create', (req, res) => {
   let locations = req.app.get('locationsMemory');
 
   //Get the row
-  mysqlConnection.mysqlConnection.query('INSERT INTO service(usercode_solicita , status, date_created) values (?,?,?)',[usercode_solicita, STATUS_SERVICE_PENDING,dateNow],(err, rows, fields) => {
+  mysqlConnection.mysqlConnection.query('INSERT INTO service(usercode_solicita , status, placecode, date_created) values (?,?,?,?)',[usercode_solicita, STATUS_SERVICE_PENDING,placecode,dateNow],(err, rows, fields) => {
     if (!err) {
       pedido.map( p => {
         mysqlConnection.mysqlConnection.query("INSERT INTO service_detalle (id_service, description, count) VALUES (?,?,?)",
