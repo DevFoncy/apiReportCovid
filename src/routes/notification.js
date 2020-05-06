@@ -41,7 +41,7 @@ router.post('/service/create', (req, res) => {
       let response = locations.filter( (location) => location.id === placecode)[0];
       if(response){
         let usercode = usercode_solicita;
-        let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'");
+        let coordenadas = mysqlConnection.connectionSyncronus.query('select latitud, longitud from usuario where id=' + "'"+ usercode + "'")[0];
         mysqlConnection.mysqlConnection.query(' SELECT *,\n' +
           '      111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))\n' +
           '                 * COS(RADIANS(latitud))\n' +
@@ -55,7 +55,7 @@ router.post('/service/create', (req, res) => {
           ' where latitud <> -12.0474073 and longitud <> -76.9370903\n' +
           ' having distance_in_km < 1\n' +
           ' order by distance_in_km asc\n' +
-          ' limit 5;',[coordenadas[0].latitud,  coordenadas[0].longitud], (err, rows) => {
+          ' limit 5;',[coordenadas.latitud,  coordenadas.longitud], (err, rows) => {
           if (!err) {
             let userInto = response.supportUsers; // array  support users into location
             let tokensAvailable = [];
