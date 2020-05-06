@@ -37,4 +37,25 @@ router.get('/service/all', (req, res) => {
   });
 });
 
+router.get('/service', (req, res) => {
+  let id = req.query.id;
+  mysqlConnection.mysqlConnection.query('SELECT * FROM service WHERE id = ?', [id],(err, rows, fields) => {
+    if (!err && rows.length > 0) {
+      let response = rows[0];
+      let detalle = mysqlConnection.connectionSyncronus.query('select * from service_detalle where id_service = ' + "'"+ id + "'");
+      let location = mysqlConnection.connectionSyncronus.query('select * from establecimiento where id = ' + response.placecode)[0];
+      response.usercode_solicita = response.usercode_solicita ?  mysqlConnection.connectionSyncronus.query('select * from usuario where id = ' + "'"+ response.usercode_solicita + "'")[0] : null;
+      response.usercode_favor = response.usercode_favor ?  mysqlConnection.connectionSyncronus.query('select * from usuario where id = ' + "'"+ response.usercode_favor + "'")[0] : null;
+      response.items = detalle.map( d => { return { descripcion : d.description, cantidad : d.count}});
+      response.placeLocation = location;
+      delete response.placecode;
+      delete response.rating;
+      delete response.pedido;
+      res.json( endPointsFormat.formatEndPointSuccess('Servicio encontrado',response));
+    } else {
+      res.json( endPointsFormat.formatEndPointFailed('No se pudo  encontrar el servicio solicitado'));
+    }
+  });
+});
+
 module.exports = router;
